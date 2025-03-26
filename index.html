@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Проверка поддержки preferCurrentTab</title>
+  <style>
+    body {
+      background-color: #eee;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+      transition: background-color 0.3s ease;
+    }
+    button {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button id="checkButton">Проверить поддержку preferCurrentTab</button>
+  <script>
+    async function checkPreferCurrentTab() {
+      try {
+        // Запрашиваем поток с указанием preferCurrentTab и displaySurface: 'browser'
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          preferCurrentTab: true,
+          video: { displaySurface: 'browser' }
+        });
+        
+        // Получаем первую видео-дорожку и её настройки
+        const videoTrack = stream.getVideoTracks()[0];
+        const settings = videoTrack.getSettings();
+        
+        // Останавливаем дорожки сразу после получения нужной информации
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Если displaySurface равен "browser", значит опция учтена
+        if (settings.displaySurface === 'browser') {
+          document.body.style.backgroundColor = 'green';
+          document.body.innerHTML = '<h1>Поддерживается</h1>';
+        } else {
+          document.body.style.backgroundColor = 'red';
+          document.body.innerHTML = '<h1>Не поддерживается, displaySurface: ' + settings.displaySurface + '</h1>';
+        }
+      } catch (error) {
+        document.body.style.backgroundColor = 'red';
+        document.body.innerHTML = '<h1>Ошибка: ' + error.message + '</h1>';
+      }
+    }
+    
+    document.getElementById('checkButton').addEventListener('click', checkPreferCurrentTab);
+  </script>
+</body>
+</html>
